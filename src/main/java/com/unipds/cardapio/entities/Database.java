@@ -1,100 +1,81 @@
 package com.unipds.cardapio.entities;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
-import com.unipds.cardapio.enums.CategoriaCardapio;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 public class Database {
+    
+    private final Map<Long, ItemCardapio> itensPorId = new ConcurrentSkipListMap<>();
+    private final Map<ItemCardapio, BigDecimal> auditoriaPrecos = new IdentityHashMap<>();
+    
+    public Database() {
+//        var refrescoDoChaves = new ItemCardapio(1L, "Refresco do Chaves",
+//                "Suco de limão que parece de tamarindo e tem gosto de groselha.",
+//                BEBIDAS, new BigDecimal("2.99"), null);
+//        itensPorId.put(refrescoDoChaves.id(), refrescoDoChaves);
+//
+//        var sanduicheDoChaves = new ItemCardapio(2L, "Sanduíche de Presunto do Chaves",
+//                "Sanduíche de presunto simples, mas feito com muito amor.",
+//                PRATOS_PRINCIPAIS, new BigDecimal("3.50"), new BigDecimal("2.99"));
+//        itensPorId.put(sanduicheDoChaves.id(), sanduicheDoChaves);
+//
+//        var tortaDaDonaFlorinda = new ItemCardapio(5L, "Torta de Frango da Dona Florinda",
+//                "Torta de frango com recheio cremoso e massa crocante.",
+//                PRATOS_PRINCIPAIS, new BigDecimal("12.99"), new BigDecimal("10.99"));
+//        itensPorId.put(tortaDaDonaFlorinda.id(), tortaDaDonaFlorinda);
+//
+//        var pipocaDoQuico = new ItemCardapio(6L, "Pipoca do Quico",
+//                "Balde de pipoca preparado com carinho pelo Quico.",
+//                PRATOS_PRINCIPAIS, new BigDecimal("4.99"), new BigDecimal("3.99"));
+//        itensPorId.put(pipocaDoQuico.id(), pipocaDoQuico);
+//
+//        var aguaDeJamaica = new ItemCardapio(7L, "Água de Jamaica",
+//                "Água aromatizada com hibisco e toque de açúcar.",
+//                BEBIDAS, new BigDecimal("2.50"), new BigDecimal("2.00"));
+//        itensPorId.put(aguaDeJamaica.id(), aguaDeJamaica);
+//
+//        var churrosDoChaves = new ItemCardapio(9L, "Churros do Chaves",
+//                "Churros recheados com doce de leite, clássicos e irresistíveis.",
+//                SOBREMESA, new BigDecimal("4.99"), new BigDecimal("3.99"));
+//        itensPorId.put(churrosDoChaves.id(), churrosDoChaves);
+    }
 
-	private final Map<Long, ItemCardapio> itensPorId = new HashMap<>();
-	private final Map<ItemCardapio, BigDecimal> auditoriaPrecos = new IdentityHashMap<>();
+    public List<ItemCardapio> listaItensCardapio() {
+        return new LinkedList<>(itensPorId.values());
+    }
 
-	public Database() {
-		ItemCardapio refrescoDoChaves = new ItemCardapio(1L, "Refresco do Chaves",
-				"Suco de Limão, que parece tamarindo mas tem gosto de groselha", CategoriaCardapio.BEBIDAS,
-				new BigDecimal("2.99"), null);
-		itensPorId.put(1L, refrescoDoChaves);
+    public Optional<ItemCardapio> itemCardapioPorId(Long id) {
+        return Optional.ofNullable(itensPorId.get(id));
+    }
 
-		ItemCardapio sanduicheDePresunto = new ItemCardapio(2L, "Sanduíche de Presunto",
-				"O preferido do Chaves. Só não peça para dividir.", CategoriaCardapio.PRATOS_PRINCIPAIS,
-				new BigDecimal("15.50"), null);
-		itensPorId.put(2L, sanduicheDePresunto);
+    public boolean removeItemCardapio(Long id) {
+        ItemCardapio removido = itensPorId.remove(id);
+        return removido != null;
+    }
 
-		ItemCardapio churrosDonaFlorinda = new ItemCardapio(3L, "Churros da Dona Florinda",
-				"Feitos com açúcar e muito carinho (e o Seu Madruga que fritou).", CategoriaCardapio.SOBREMESA,
-				new BigDecimal("8.00"), null);
-		itensPorId.put(3L, churrosDonaFlorinda);
+    public boolean alteraPrecoItemCardapio(Long id, BigDecimal novoPreco) {
+        ItemCardapio item = itensPorId.get(id);
+        if (item == null ) return false;
+        ItemCardapio itemPrecoAlterado = item.alteraPreco(novoPreco);
+        itensPorId.put(id, itemPrecoAlterado);
+        auditoriaPrecos.put(item, novoPreco);
+        return true;
+    }
 
-		ItemCardapio cafeDaDonaFlorinda = new ItemCardapio(4L, "Café do Não Seria Muita Incomodação?",
-				"Acompanha um convite para entrar e tomar uma xícara.", CategoriaCardapio.BEBIDAS,
-				new BigDecimal("4.50"), null);
-		itensPorId.put(4L, cafeDaDonaFlorinda);
+    public void rastroAuditoriaPrecos() {
+        System.out.println("\nAuditoria de preços:");
+        auditoriaPrecos.forEach((item, preco) ->
+                System.out.printf(" - %s: %s => %s\n", item.nome(), item.preco(), preco));
+        System.out.println();
+    }
 
-		ItemCardapio tortaDePresunto = new ItemCardapio(5L, "Torta de Presunto Especial",
-				"A versão 'gourmet' do sanduíche, digna de um festival.", CategoriaCardapio.PRATOS_PRINCIPAIS,
-				new BigDecimal("22.00"), null);
-		itensPorId.put(5L, tortaDePresunto);
+    public int totalItensCardapio() {
+        return itensPorId.size();
+    }
 
-		ItemCardapio pezinhosDePorco = new ItemCardapio(6L, "Pezinhos de Porco à la Seu Madruga",
-				"Um clássico das compras de última hora no mercado.", CategoriaCardapio.PRATOS_PRINCIPAIS,
-				new BigDecimal("18.90"), null);
-		itensPorId.put(6L, pezinhosDePorco);
-
-		ItemCardapio boloDaDonaClotilde = new ItemCardapio(7L, "Bolo da Bruxa do 71",
-				"Dizem que foi feito com feitiçaria, mas é só chocolate.", CategoriaCardapio.SOBREMESA,
-				new BigDecimal("12.00"), null);
-		itensPorId.put(7L, boloDaDonaClotilde);
-
-		ItemCardapio pirulitoDoKiko = new ItemCardapio(8L, "Pirulito Gigante",
-				"Tão grande que causa inveja em toda a vizinhança.", CategoriaCardapio.SOBREMESA,
-				new BigDecimal("5.50"), null);
-		itensPorId.put(8L, pirulitoDoKiko);
-
-		ItemCardapio panquecasDoSeuMadruga = new ItemCardapio(9L, "Panquecas de 'Creme'",
-				"Receita especial que ele aprendeu enquanto não trabalhava.", CategoriaCardapio.ENTRADAS,
-				new BigDecimal("10.00"), null);
-		itensPorId.put(9L, panquecasDoSeuMadruga);
-
-		ItemCardapio leiteDeBurra = new ItemCardapio(10L, "Leite de Burra",
-				"Dizem que é bom para os nervos (ou para o Chaves quando se assusta).", CategoriaCardapio.BEBIDAS,
-				new BigDecimal("6.00"), null);
-		itensPorId.put(10L, leiteDeBurra);
-	}
-
-	public List<ItemCardapio> listaDeItensCardapio() {
-		return new ArrayList<>(itensPorId.values());
-	}
-
-	public Optional<ItemCardapio> itemCardapioPorId(Long id) {
-		return Optional.ofNullable(itensPorId.get(id));
-	}
-
-	public boolean removerItemCardapio(Long id) {
-		ItemCardapio removido = itensPorId.remove(id);
-		return removido != null;
-	}
-
-	public boolean alterarPrecoItemCardapio(Long id, BigDecimal novoPreco) {
-		ItemCardapio itemAntigo = itensPorId.get(id);
-		if(id == null) {
-			return false;	
-		}else {
-			ItemCardapio itemComPrecoAlterado = itemAntigo.alterarPreco(novoPreco);
-			itensPorId.put(id, itemComPrecoAlterado);
-			auditoriaPrecos.put(itemAntigo, novoPreco);
-			return true;
-		}
-	}
-
-	public void imprimirRastroAuditoriaPrecos() {
-		System.out.println("\nAuditoria de preços: ");
-		auditoriaPrecos.forEach((itemAntigo, novoPreco) -> System.out.printf("\n- %s: %s => %s", itemAntigo.nome(), itemAntigo.preco(), novoPreco));
-		System.out.println();
-	}
+    public void adicionaItemCardapio(ItemCardapio item) {
+        itensPorId.put(item.id(), item);
+    }
 }

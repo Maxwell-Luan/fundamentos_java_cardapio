@@ -11,15 +11,16 @@ import com.unipds.cardapio.entities.ItemCardapio;
 
 public class GeradorItensCardapioJSON {
 
-	public static void main(String[] args) throws IOException {
-		Database database = new Database();
-		List<ItemCardapio> listaItensCardapio = database.listaDeItensCardapio();
-		
-		Gson gson = new Gson();
-		String json = gson.toJson(listaItensCardapio);
-		System.out.println(json);
-		
-		Path path = Path.of("itensCardapio.json");
-		Files.writeString(path, json);
-	}
+    public static void main(String[] args) throws IOException {
+        Database database = new Database();
+        List<ItemCardapio> listaItensCardapio = database.listaItensCardapio();
+
+        Gson gson = new Gson();
+        String json = gson.toJson(listaItensCardapio);
+
+        Path path = Path.of("itensCardapio.json");
+        Files.writeString(path, json);
+
+    }
+
 }
